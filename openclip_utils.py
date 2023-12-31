@@ -262,7 +262,7 @@ def eval_logits_model(
 
 
 def train_student_classification_model(
-        f_name,
+
         output_dir,
         model,
         train_dataset,
@@ -286,7 +286,7 @@ def train_student_classification_model(
     writer = SummaryWriter(output_dir)
 
     model = model.cuda()
-    
+
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     train_loader = torch.utils.data.DataLoader(
@@ -346,7 +346,7 @@ def train_student_classification_model(
             train_loss += float(loss)
 
         train_loss /= len(train_loader)
-        np.save(f_name+'.npy', loss_all)
+        np.save('exp.npy', loss_all)
 
         # Eval
         model.eval()

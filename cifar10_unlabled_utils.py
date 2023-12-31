@@ -31,8 +31,8 @@ from openclip_utils import (
     EmbeddingDatasetWrapper,
     FilterTextEmbeddings
 )
-#from torchvision.datasets import cifar10_c
-from cifar10_c_cifar_c import CIFAR10_C
+#from torchvision.datasets import cifar10
+from stl10_cifar import CIFAR10
 from torchvision.transforms import Compose, ToTensor, Normalize, Resize, RandomResizedCrop, InterpolationMode, CenterCrop
 from open_images_utils import (
     get_open_images_val_embedding_dataset,
@@ -52,7 +52,7 @@ CIFAR10_LABELS = [
     'trucks'
 ]
 
-def get_cifar10_c_transform():
+def get_cifar10_transform():
     transform = Compose([
         ToTensor(),
         Normalize(0.5, 0.25)
@@ -60,12 +60,12 @@ def get_cifar10_c_transform():
     return transform
 
 
-def precompute_clip_cifar10_c_image_embeddings(
+def precompute_clip_cifar10_image_embeddings(
         output_dir, 
         dataset_path,
         data_split,
         overwrite=False):
-    dataset = CIFAR10_C(
+    dataset = CIFAR10(
         root=dataset_path,
         split=data_split
     )
@@ -76,96 +76,96 @@ def precompute_clip_cifar10_c_image_embeddings(
     )
 
 
-def precompute_clip_cifar10_c_unlabeled_image_embeddings():
-    precompute_clip_cifar10_c_image_embeddings(
-        output_dir="data/cifar10_c_w_unlabeled/cifar10_unlabeled_image_embeddings",
-        dataset_path="../data/cifar10_c",
+def precompute_clip_cifar10_unlabeled_image_embeddings():
+    precompute_clip_cifar10_image_embeddings(
+        output_dir="data/cifar10_w_unlabeled/cifar10_unlabeled_image_embeddings",
+        dataset_path="../data/cifar10/data",
         data_split="unlabeled"
     )
 
 
-def precompute_clip_cifar10_c_train_image_embeddings():
-    precompute_clip_cifar10_c_image_embeddings(
-        output_dir="data/cifar10_c_w_unlabeled/cifar10_c_train_image_embeddings",
-        dataset_path="../data/cifar10_c",
+def precompute_clip_cifar10_train_image_embeddings():
+    precompute_clip_cifar10_image_embeddings(
+        output_dir="data/cifar10_w_unlabeled/cifar10_train_image_embeddings",
+        dataset_path="../data/cifar10/data",
         data_split="train"
     )
 
 
-def precompute_clip_cifar10_c_test_image_embeddings():
-    precompute_clip_cifar10_c_image_embeddings(
-        output_dir="data/cifar10_c_w_unlabeled/cifar10_c_test_image_embeddings",
-        dataset_path="../data/cifar10_c",
+def precompute_clip_cifar10_test_image_embeddings():
+    precompute_clip_cifar10_image_embeddings(
+        output_dir="data/cifar10_w_unlabeled/cifar10_test_image_embeddings",
+        dataset_path="../data/cifar10/data",
         data_split="test"
     )
 
 
-def precompute_clip_cifar10_c_text_embeddings():
+def precompute_clip_cifar10_text_embeddings():
     precompute_clip_text_embeddings(
-        output_path="data/cifar10_c_w_unlabeled/cifar10_c_text_embeddings.pt",
+        output_path="data/cifar10_w_unlabeled/cifar10_text_embeddings.pt",
         labels=CIFAR10_LABELS,
 
     )
 
 
-def get_clip_cifar10_c_text_embeddings():
-    return torch.load("data/cifar10_c_w_unlabeled/cifar10_c_text_embeddings.pt")
+def get_clip_cifar10_text_embeddings():
+    return torch.load("data/cifar10_w_unlabeled/cifar10_text_embeddings.pt")
 
 
-def get_cifar10_c_unlabeled_embedding_dataset():
+def get_cifar10_unlabeled_embedding_dataset():
 
     return EmbeddingDatasetWrapper(
-        dataset=CIFAR10_C(
-            root="../data/cifar10_c",
+        dataset=CIFAR10(
+            root="../data/cifar10/data",
             split="unlabeled"
         ),
-        embeddings_dir="data/clip/cifar10_c_unlabeled_image_embeddings"
+        embeddings_dir="data/clip/cifar10_unlabeled_image_embeddings"
     )
 
 
-def get_cifar10_c_train_embedding_dataset():
+def get_cifar10_train_embedding_dataset():
 
     return EmbeddingDatasetWrapper(
-        dataset=CIFAR10_C(
-            root="../data/cifar10_c",
+        dataset=CIFAR10(
+            root="../data/cifar10/data",
             split="train",
         ),
-        embeddings_dir="data/cifar10_c_w_unlabeled/cifar10_c_train_image_embeddings"
+        embeddings_dir="data/cifar10_w_unlabeled/cifar10_train_image_embeddings"
     )
 
 
-def get_cifar10_c_train_unlabeled_embedding_dataset(transform=None):
+def get_cifar10_train_unlabeled_embedding_dataset(transform=None):
     return torch.utils.data.ConcatDataset([
-        get_cifar10_c_train_embedding_dataset(),
-        get_cifar10_c_unlabeled_embedding_dataset()
+        get_cifar10_train_embedding_dataset(),
+        get_cifar10_unlabeled_embedding_dataset()
     ])
 
 
-def get_cifar10_c_test_embedding_dataset(transform=None):
+def get_cifar10_test_embedding_dataset(transform=None):
 
     return EmbeddingDatasetWrapper(
-        dataset=CIFAR10_C(
-            root="../data/cifar10_c",
+        dataset=CIFAR10(
+            root="../data/cifar10/data",
             split="test",
         ),
-        embeddings_dir="data/cifar10_c_w_unlabeled/cifar10_c_test_image_embeddings"
+        embeddings_dir="data/cifar10_w_unlabeled/cifar10_test_image_embeddings"
     )
 
 
-def eval_cifar10_c_train_clip_embeddings():
-    text_embeddings = get_clip_cifar10_c_text_embeddings()
-    dataset = get_cifar10_c_train_embedding_dataset()
+def eval_cifar10_train_clip_embeddings():
+    text_embeddings = get_clip_cifar10_text_embeddings()
+    dataset = get_cifar10_train_embedding_dataset()
     accuracy = eval_dataset_clip_embeddings(dataset, text_embeddings)
-    with open("data/cifar10_c_w_unlabeled/cifar10_c_train_clip_acc.txt", 'w') as f:
+    with open("data/cifar10_w_unlabeled/cifar10_train_clip_acc.txt", 'w') as f:
         f.write(f"ACCURACY: {accuracy}")
     return accuracy
 
 
-def eval_cifar10_c_test_clip_embeddings():
-    text_embeddings = get_clip_cifar10_c_text_embeddings()
-    dataset = get_cifar10_c_test_embedding_dataset()
+def eval_cifar10_test_clip_embeddings():
+    text_embeddings = get_clip_cifar10_text_embeddings()
+    dataset = get_cifar10_test_embedding_dataset()
     accuracy = eval_dataset_clip_embeddings(dataset, text_embeddings)
-    with open("data/cifar10_c_w_unlabeled/cifar10_c_test_clip_acc.txt", 'w') as f:
+    with open("data/cifar10_w_unlabeled/cifar10_test_clip_acc.txt", 'w') as f:
         f.write(f"ACCURACY: {accuracy}")
     return accuracy
 
@@ -174,10 +174,10 @@ def eval_cifar10_c_test_clip_embeddings():
 
 def train_probe_model_linear():
     train_probe_model(
-        output_dir="data/experiments/cifar10_c_w_unlabeled/train_probe_model_linear",
+        output_dir="data/experiments/cifar10_w_unlabeled/train_probe_model_linear",
         probe_model=nn.Linear(512, len(CIFAR10_LABELS)),
-        train_dataset=get_cifar10_c_train_embedding_dataset(),
-        test_dataset=get_cifar10_c_test_embedding_dataset(),
+        train_dataset=get_cifar10_train_embedding_dataset(),
+        test_dataset=get_cifar10_test_embedding_dataset(),
         learning_rate=3e-4,
         batch_size=64,
         num_workers=8,
@@ -195,10 +195,10 @@ def train_probe_model_mlp():
         nn.Linear(512, 10)
     )
     train_probe_model(
-        output_dir="data/experiments/cifar10_c_w_unlabeled/train_probe_model_mlp",
+        output_dir="data/experiments/cifar10_w_unlabeled/train_probe_model_mlp",
         probe_model=model,
-        train_dataset=get_cifar10_c_train_embedding_dataset(),
-        test_dataset=get_cifar10_c_test_embedding_dataset(),
+        train_dataset=get_cifar10_train_embedding_dataset(),
+        test_dataset=get_cifar10_test_embedding_dataset(),
         learning_rate=3e-4,
         batch_size=64,
         num_workers=8,
@@ -209,7 +209,7 @@ def train_probe_model_mlp():
 
 
 def train_student_linear_probe(
-        f_name,
+        
         output_dir: str,
         arch: str,
         temperature: float=1.,
@@ -217,17 +217,17 @@ def train_student_linear_probe(
         test_dataset=None
     ):
     if train_dataset is None:
-        train_dataset = get_cifar10_c_train_unlabeled_embedding_dataset()
+        train_dataset = get_cifar10_train_unlabeled_embedding_dataset()
     if test_dataset is None:
-        test_dataset = get_cifar10_c_test_embedding_dataset()
+        test_dataset = get_cifar10_test_embedding_dataset()
     # call train_probe_model_linear first
     probe_model = nn.Linear(512, len(CIFAR10_LABELS))
-    probe_weights = "data/experiments/data/experiments/cifar10_c_w_unlabeled/train_probe_model_linear/checkpoint_14.pth"
+    probe_weights = "data/experiments/data/experiments/cifar10_w_unlabeled/train_probe_model_linear/checkpoint_14.pth"
     if not os.path.exists(probe_weights):
         train_probe_model_linear()
-    probe_model.load_state_dict(torch.load("data/experiments/cifar10_c_w_unlabeled/train_probe_model_linear/checkpoint_14.pth"))
+    probe_model.load_state_dict(torch.load("data/experiments/cifar10_w_unlabeled/train_probe_model_linear/checkpoint_14.pth"))
     train_student_classification_model(
-        f_name,
+        
         output_dir=output_dir,
         model=timm.create_model(arch, num_classes=len(CIFAR10_LABELS)),
         train_dataset=train_dataset,
@@ -242,7 +242,7 @@ def train_student_linear_probe(
     )
 
 def train_student_zero_shot(
-        f_name,
+        
         output_dir: str,
         arch: str,
         temperature: float=1.,
@@ -250,14 +250,14 @@ def train_student_zero_shot(
         test_dataset = None
     ):
     if train_dataset is None:
-        train_dataset = get_cifar10_c_train_unlabeled_embedding_dataset()
+        train_dataset = get_cifar10_train_unlabeled_embedding_dataset()
     if test_dataset is None:
-        test_dataset = get_cifar10_c_test_embedding_dataset()
+        test_dataset = get_cifar10_test_embedding_dataset()
     print('\nOutput directory: ', output_dir)
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     train_student_classification_model(
-        f_name,
+        
         output_dir=output_dir,
         model=timm.create_model(arch, num_classes=len(CIFAR10_LABELS)),
         train_dataset=train_dataset,
@@ -267,7 +267,7 @@ def train_student_zero_shot(
         num_workers=8,
         num_epochs=50,
         temperature=temperature,
-        text_embeddings=get_clip_cifar10_c_text_embeddings(),
+        text_embeddings=get_clip_cifar10_text_embeddings(),
         seed=0
     )
 
@@ -275,10 +275,10 @@ def train_student_zero_shot(
 
 def train_resnet18_from_scratch():
     train_model_from_scratch(
-        output_dir="data/experiments/cifar10_c_w_unlabeled/train_resnet18_from_scratch",
+        output_dir="data/experiments/cifar10_w_unlabeled/train_resnet18_from_scratch",
         model=timm.create_model("resnet18", num_classes=len(CIFAR10_LABELS)),
-        train_dataset=get_cifar10_c_train_embedding_dataset(),
-        test_dataset=get_cifar10_c_test_embedding_dataset(),
+        train_dataset=get_cifar10_train_embedding_dataset(),
+        test_dataset=get_cifar10_test_embedding_dataset(),
         learning_rate=3e-4,
         batch_size=64,
         num_workers=8,
@@ -286,84 +286,84 @@ def train_resnet18_from_scratch():
         seed=0
     )
 
-def train_resnet18_zero_shot_train_only(f_name):
+def train_resnet18_zero_shot_train_only():
     train_student_zero_shot(
-        f_name,
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_zero_shot_train_only",
+        
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_zero_shot_train_only",
         arch="resnet18",
         temperature=1.,
-        train_dataset=get_cifar10_c_train_embedding_dataset()
+        train_dataset=get_cifar10_train_embedding_dataset()
     )
 
-def train_resnet18_zero_shot(f_name):
+def train_resnet18_zero_shot():
     train_student_zero_shot(
-        f_name,
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_zero_shot",
+        
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_zero_shot",
         arch="resnet18",
         temperature=1.
     )
 
 def train_resnet18_zero_shot_t100():
     train_student_zero_shot(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_zero_shot",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_zero_shot",
         arch="resnet18",
         temperature=100.
     )
 def train_resnet18_zero_shot_tp5():
     train_student_zero_shot(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_zero_shot_tp5",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_zero_shot_tp5",
         arch="resnet18",
         temperature=0.5
     )
 
 def train_resnet18_zero_shot_t2():
     train_student_zero_shot(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_zero_shot_t2",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_zero_shot_t2",
         arch="resnet18",
         temperature=2.0
     )
 
-def train_resnet18_linear_probe(f_name):
+def train_resnet18_linear_probe():
     train_student_linear_probe(
-        f_name,
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_linear_probe",
+        
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_linear_probe",
         arch="resnet18", 
         temperature=1.
     )
 
-def train_resnet18_linear_probe_train_only(f_name):
+def train_resnet18_linear_probe_train_only():
     train_student_linear_probe(
-        f_name,
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_linear_probe_train_only",
+        
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_linear_probe_train_only",
         arch="resnet18", 
         temperature=1.,
-        train_dataset=get_cifar10_c_train_embedding_dataset()
+        train_dataset=get_cifar10_train_embedding_dataset()
     )
 
 def train_resnet18_linear_probe_tp5():
     train_student_linear_probe(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_linear_probe_tp5",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_linear_probe_tp5",
         arch="resnet18", 
         temperature=0.5
     )
 
 def train_resnet18_linear_probe_t2():
     train_student_linear_probe(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_linear_probe_t2",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet18_linear_probe_t2",
         arch="resnet18", 
         temperature=2.0
     )
 
 def train_resnet34_linear_probe():
     train_student_linear_probe(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet34_linear_probe",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet34_linear_probe",
         arch="resnet34", 
         temperature=1.
     )
 
 def train_resnet50_linear_probe():
     train_student_linear_probe(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/train_resnet50_linear_probe",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/train_resnet50_linear_probe",
         arch="resnet50", 
         temperature=1.
     )
@@ -371,9 +371,9 @@ def train_resnet50_linear_probe():
 def train_embedding_text(output_dir: str, arch: str, train_dataset=None,
         test_dataset=None, weight_by_nearest_embedding=False, nearest_embedding_weight_std=1.):
     if train_dataset is None:
-        train_dataset = get_cifar10_c_train_unlabeled_embedding_dataset()
+        train_dataset = get_cifar10_train_unlabeled_embedding_dataset()
     if test_dataset is None:
-        test_dataset = get_cifar10_c_test_embedding_dataset()
+        test_dataset = get_cifar10_test_embedding_dataset()
     train_student_embedding_model(
         output_dir=output_dir,
         model=timm.create_model(arch, num_classes=512),
@@ -383,7 +383,7 @@ def train_embedding_text(output_dir: str, arch: str, train_dataset=None,
         batch_size=64,
         num_workers=8,
         num_epochs=50,
-        text_embeddings=get_clip_cifar10_c_text_embeddings(),
+        text_embeddings=get_clip_cifar10_text_embeddings(),
         seed=0,
         include_test_accuracy=True,
         weight_by_nearest_embedding=weight_by_nearest_embedding,
@@ -391,88 +391,88 @@ def train_embedding_text(output_dir: str, arch: str, train_dataset=None,
     )
 
 def train_resnet18_embedding_text():
-    train_embedding_text(f"data/experiments/cifar10_c_w_unlabeled/train_resnet18_embedding_text","resnet18")
+    train_embedding_text(f"data/experiments/cifar10_w_unlabeled/train_resnet18_embedding_text","resnet18")
 
 
 def eval_resnet18_embedding_text():
     model = timm.create_model("resnet18", num_classes=512)
-    model.load_state_dict(torch.load("data/experiments/cifar10_c_w_unlabeled/train_resnet18_embedding_text/checkpoint_48.pth"))
+    model.load_state_dict(torch.load("data/experiments/cifar10_w_unlabeled/train_resnet18_embedding_text/checkpoint_48.pth"))
 
     eval_embeddings_model(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/eval_resnet18_embedding_text",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/eval_resnet18_embedding_text",
         model=model,
-        dataset=get_cifar10_c_test_embedding_dataset(),
-        text_embeddings=get_clip_cifar10_c_text_embeddings()
+        dataset=get_cifar10_test_embedding_dataset(),
+        text_embeddings=get_clip_cifar10_text_embeddings()
     )
 
 def eval_resnet18_embedding_linear():
     model = timm.create_model("resnet18", num_classes=512)
-    model.load_state_dict(torch.load("data/experiments/cifar10_c_w_unlabeled/train_resnet18_embedding_text/checkpoint_48.pth"))
+    model.load_state_dict(torch.load("data/experiments/cifar10_w_unlabeled/train_resnet18_embedding_text/checkpoint_48.pth"))
 
     probe_model = nn.Linear(512, len(CIFAR10_LABELS))
-    probe_weights = "data/experiments/cifar10_c_w_unlabeled/train_probe_model_linear/checkpoint_14.pth"
+    probe_weights = "data/experiments/cifar10_w_unlabeled/train_probe_model_linear/checkpoint_14.pth"
     if not os.path.exists(probe_weights):
         train_probe_model_linear()
     probe_model.load_state_dict(torch.load(probe_weights))
 
     eval_embeddings_model(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/eval_resnet18_embedding_linear",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/eval_resnet18_embedding_linear",
         model=model,
-        dataset=get_cifar10_c_test_embedding_dataset(),
+        dataset=get_cifar10_test_embedding_dataset(),
         probe_model=probe_model
     )
 
 
 def eval_resnet18_embedding_mlp():
     model = timm.create_model("resnet18", num_classes=512)
-    model.load_state_dict(torch.load("data/experiments/cifar10_c_w_unlabeled/train_resnet18_embedding_text/checkpoint_48.pth"))
+    model.load_state_dict(torch.load("data/experiments/cifar10_w_unlabeled/train_resnet18_embedding_text/checkpoint_48.pth"))
 
     probe_model = nn.Sequential(
         nn.Linear(512, 512),
         nn.ReLU(),
         nn.Linear(512, len(CIFAR10_LABELS))
     )
-    probe_weights = "data/experiments/cifar10_c_w_unlabeled/train_probe_model_mlp/checkpoint_14.pth"
+    probe_weights = "data/experiments/cifar10_w_unlabeled/train_probe_model_mlp/checkpoint_14.pth"
     if not os.path.exists(probe_weights):
         train_probe_model_mlp()
     probe_model.load_state_dict(torch.load(probe_weights))
     eval_embeddings_model(
-        output_dir=f"data/experiments/cifar10_c_w_unlabeled/eval_resnet18_embedding_mlp",
+        output_dir=f"data/experiments/cifar10_w_unlabeled/eval_resnet18_embedding_mlp",
         model=model,
-        dataset=get_cifar10_c_test_embedding_dataset(),
+        dataset=get_cifar10_test_embedding_dataset(),
         probe_model=probe_model
     )
 
-def get_cifar10_c_open_images_filtered_dataset_90(transform=None):
+def get_cifar10_open_images_filtered_dataset_90(transform=None):
     return FilterTextEmbeddings(
         get_open_images_val_embedding_dataset(transform),
-        text_embeddings=get_clip_cifar10_c_text_embeddings(),
+        text_embeddings=get_clip_cifar10_text_embeddings(),
         thresh=0.9
     )
 
 def train_resnet18_text_open_images_224_filter90():
     train_student_zero_shot(
-        "data/experiments/cifar10_c_w_unlabeled/train_resnet18_text_open_images_224_filter90",
+        "data/experiments/cifar10_w_unlabeled/train_resnet18_text_open_images_224_filter90",
         arch="resnet18",
         temperature=1.,
-        train_dataset=get_cifar10_c_open_images_filtered_dataset_90(),
-        test_dataset=get_cifar10_c_test_embedding_dataset(transform=get_open_images_val_transform())
+        train_dataset=get_cifar10_open_images_filtered_dataset_90(),
+        test_dataset=get_cifar10_test_embedding_dataset(transform=get_open_images_val_transform())
     )
 def train_resnet18_text_open_images_224_filter90_temp100():
     train_student_zero_shot(
-        "data/experiments/cifar10_c_w_unlabeled/train_resnet18_text_open_images_224_filter90_temp100",
+        "data/experiments/cifar10_w_unlabeled/train_resnet18_text_open_images_224_filter90_temp100",
         arch="resnet18",
         temperature=100.,
-        train_dataset=get_cifar10_c_open_images_filtered_dataset_90(),
-        test_dataset=get_cifar10_c_test_embedding_dataset(transform=get_open_images_val_transform())
+        train_dataset=get_cifar10_open_images_filtered_dataset_90(),
+        test_dataset=get_cifar10_test_embedding_dataset(transform=get_open_images_val_transform())
     )
 def train_resnet18_text_open_images_96_filter90_temp100():
     train_student_zero_shot(
-        "data/experiments/cifar10_c_w_unlabeled/train_resnet18_text_open_images_96_filter90_temp100",
+        "data/experiments/cifar10_w_unlabeled/train_resnet18_text_open_images_96_filter90_temp100",
         arch="resnet18",
         temperature=100.,
-        train_dataset=get_cifar10_c_open_images_filtered_dataset_90(get_open_images_val_transform(size=96)),
-        test_dataset=get_cifar10_c_test_embedding_dataset(transform=get_open_images_val_transform(size=96))
+        train_dataset=get_cifar10_open_images_filtered_dataset_90(get_open_images_val_transform(size=96)),
+        test_dataset=get_cifar10_test_embedding_dataset(transform=get_open_images_val_transform(size=96))
     )
 
 if __name__ == "__main__":
